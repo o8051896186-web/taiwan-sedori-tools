@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台湾せどり管理ツール</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Hiragino Sans', sans-serif; background: #f0f4f8; color: #2d3748; min-height: 100vh; }
+
+  /* ===== ヘッダー ===== */
+  header {
+    background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+    color: white;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: bold; }
+  .logo-flag { font-size: 1.5rem; }
+  .header-stats { display: flex; gap: 20px; font-size: 0.85rem; }
+  .stat-chip { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; }
+  .stat-chip span { font-weight: bold; }
+
+  /* ===== ナビゲーション ===== */
+  nav {
+    background: white;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex; gap: 0; overflow-x: auto;
+  }
+  .nav-btn {
+    padding: 12px 22px; border: none; background: none; cursor: pointer;
+    font-size: 0.9rem; color: #718096; font-weight: 500; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  .nav-btn:hover { color: #c41e3a; background: #fff5f5; }
+  .nav-btn.active { color: #c41e3a; border-bottom-color: #c41e3a; font-weight: 700; }
+
+  /* ===== メインレイアウト ===== */
+  main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+  /* ===== セクション共通 ===== */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ===== カード ===== */
+  .card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 1rem; font-weight: 700; color: #2d3748;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ===== ダッシュボード ===== */
+  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .kpi-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-left: 4px solid;
+  }
+  .kpi-card.red { border-left-color: #c41e3a; }
+  .kpi-card.green { border-left-color: #38a169; }
+  .kpi-card.blue { border-left-color: #3182ce; }
+  .kpi-card.orange { border-left-color: #dd6b20; }
+  .kpi-label { font-size: 0.78rem; color: #718096; margin-bottom: 6px; }
+  .kpi-value { font-size: 1.6rem; font-weight: 800; }
+  .kpi-sub { font-size: 0.78rem; color: #718096; margin-top: 4px; }
+  .kpi-up { color: #38a169; }
+  .kpi-down { color: #e53e3e; }
+
+  /* ===== 商品テーブル ===== */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .search-box {
+    flex: 1; min-width: 200px; padding: 8px 14px; border: 1px solid #e2e8f0;
+    border-radius: 8px; font-size: 0.9rem; outline: none;
+  }
+  .search-box:focus { border-color: #c41e3a; box-shadow: 0 0 0 2px rgba(196,30,58,0.1); }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 0.88rem; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-primary { background: #c41e3a; color: white; }
+  .btn-primary:hover { background: #a01530; }
+  .btn-outline { background: white; color: #4a5568; border: 1px solid #e2e8f0; }
+  .btn-outline:hover { background: #f7fafc; }
+  .btn-sm { padding: 4px 10px; font-size: 0.8rem; border-radius: 6px; }
+  .btn-green { background: #38a169; color: white; }
+  .btn-green:hover { background: #2f855a; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th {
+    background: #f7fafc; text-align: left; padding: 10px 12px;
+    font-weight: 700; color: #4a5568; border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+  tr:hover td { background: #fff5f5; }
+
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .badge-green { background: #c6f6d5; color: #276749; }
+  .badge-yellow { background: #fefcbf; color: #975a16; }
+  .badge-red { background: #fed7d7; color: #c53030; }
+  .badge-blue { background: #bee3f8; color: #2a69ac; }
+  .badge-gray { background: #e2e8f0; color: #4a5568; }
+
+  .profit-positive { color: #38a169; font-weight: 700; }
+  .profit-negative { color: #e53e3e; font-weight: 700; }
+
+  /* ===== 利益計算 ===== */
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 0.82rem; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block; }
+  .form-input {
+    width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: #c41e3a; }
+  .form-select {
+    width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-size: 0.9rem; outline: none; background: white;
+  }
+
+  .result-box {
+    background: linear-gradient(135deg, #1a202c, #2d3748);
+    border-radius: 12px; padding: 20px; color: white;
+  }
+  .result-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.9rem; }
+  .result-row + .result-row { border-top: 1px solid rgba(255,255,255,0.1); }
+  .result-row.total { font-size: 1.1rem; font-weight: 800; padding-top: 12px; margin-top: 4px; border-top: 2px solid rgba(255,255,255,0.3) !important; }
+  .result-green { color: #68d391; }
+  .result-red { color: #fc8181; }
+  .result-yellow { color: #faf089; }
+
+  .rate-badge {
+    display: inline-block; background: rgba(255,255,255,0.15); border-radius: 8px;
+    padding: 4px 10px; font-size: 0.8rem; margin-top: 10px;
+  }
+
+  /* ===== リンク集 ===== */
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .link-card {
+    border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    transition: all 0.2s; text-decoration: none; color: inherit;
+  }
+  .link-card:hover { border-color: #c41e3a; box-shadow: 0 2px 8px rgba(196,30,58,0.12); transform: translateY(-1px); }
+  .link-icon { font-size: 1.8rem; }
+  .link-name { font-weight: 700; font-size: 0.9rem; }
+  .link-desc { font-size: 0.78rem; color: #718096; margin-top: 2px; }
+  .link-tag { font-size: 0.7rem; margin-top: 4px; }
+
+  .section-header { font-size: 0.85rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 10px; }
+
+  /* ===== メモ ===== */
+  .memo-grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+  @media (max-width: 768px) { .memo-grid { grid-template-columns: 1fr; } }
+
+  .memo-list { }
+  .memo-item {
+    padding: 12px 14px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid #e2e8f0; margin-bottom: 8px; transition: all 0.15s;
+  }
+  .memo-item:hover { border-color: #c41e3a; background: #fff5f5; }
+  .memo-item.active { border-color: #c41e3a; background: #fff5f5; }
+  .memo-item-title { font-weight: 700; font-size: 0.9rem; }
+  .memo-item-date { font-size: 0.75rem; color: #718096; margin-top: 3px; }
+  .memo-item-preview { font-size: 0.78rem; color: #718096; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .memo-editor { }
+  .memo-title-input {
+    width: 100%; padding: 10px 0; font-size: 1.2rem; font-weight: 700;
+    border: none; border-bottom: 2px solid #e2e8f0; outline: none; margin-bottom: 14px;
+  }
+  .memo-title-input:focus { border-bottom-color: #c41e3a; }
+  .memo-textarea {
+    width: 100%; height: 300px; padding: 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-size: 0.9rem; outline: none; resize: vertical;
+    line-height: 1.7;
+  }
+  .memo-textarea:focus { border-color: #c41e3a; }
+  .memo-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .tag-chip {
+    background: #fff5f5; border: 1px solid #feb2b2; color: #c41e3a;
+    border-radius: 20px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600;
+  }
+  .tag-chip.blue { background: #ebf8ff; border-color: #90cdf4; color: #2b6cb0; }
+  .tag-chip.green { background: #f0fff4; border-color: #9ae6b4; color: #276749; }
+
+  /* ===== スクロールバー ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #c41e3a; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header>
+  <div class="logo">
+    <span class="logo-flag">🇹🇼</span>
+    <span>台湾せどり管理ツール</span>
+  </div>
+  <div class="header-stats">
+    <div class="stat-chip">今月利益 <span>¥ 128,400</span></div>
+    <div class="stat-chip">仕入件数 <span>34件</span></div>
+    <div class="stat-chip">TWD/JPY <span>4.82</span></div>
+  </div>
+</header>
+
+<!-- ナビゲーション -->
+<nav>
+  <button class="nav-btn active" onclick="showSection('dashboard')">📊 ダッシュボード</button>
+  <button class="nav-btn" onclick="showSection('inventory')">📦 商品・在庫管理</button>
+  <button class="nav-btn" onclick="showSection('calculator')">🧮 利益計算</button>
+  <button class="nav-btn" onclick="showSection('links')">🔗 仕入れ先・販売先</button>
+  <button class="nav-btn" onclick="showSection('memo')">📝 メモ・ノート</button>
+</nav>
+
+<main>
+
+<!-- ========== ダッシュボード ========== -->
+<section id="dashboard" class="section active">
+
+  <div class="dashboard-grid">
+    <div class="kpi-card red">
+      <div class="kpi-label">今月の売上</div>
+      <div class="kpi-value">¥248,600</div>
+      <div class="kpi-sub kpi-up">▲ 前月比 +18%</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">今月の純利益</div>
+      <div class="kpi-value">¥128,400</div>
+      <div class="kpi-sub">利益率 <b>51.7%</b></div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">仕入れ総額（TWD）</div>
+      <div class="kpi-value">NT$24,800</div>
+      <div class="kpi-sub">≈ ¥119,600</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">在庫商品数</div>
+      <div class="kpi-value">47点</div>
+      <div class="kpi-sub kpi-down">▼ 残り少ない商品 3件</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏆 今月の利益ランキング TOP5</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>商品名</th>
+          <th>仕入れ値（TWD）</th>
+          <th>販売価格（JPY）</th>
+          <th>利益</th>
+          <th>利益率</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>台湾老舗ウーロン茶 500g</td><td>NT$280</td><td>¥4,980</td><td class="profit-positive">¥3,630</td><td><span class="badge badge-green">72%</span></td></tr>
+        <tr><td>2</td><td>パイナップルケーキ 詰め合わせ</td><td>NT$450</td><td>¥5,500</td><td class="profit-positive">¥3,330</td><td><span class="badge badge-green">60%</span></td></tr>
+        <tr><td>3</td><td>台湾コスメ アイクリーム</td><td>NT$380</td><td>¥3,980</td><td class="profit-positive">¥2,150</td><td><span class="badge badge-green">54%</span></td></tr>
+        <tr><td>4</td><td>限定カラー入浴剤セット</td><td>NT$620</td><td>¥5,800</td><td class="profit-positive">¥2,810</td><td><span class="badge badge-yellow">48%</span></td></tr>
+        <tr><td>5</td><td>有機農法ジャスミン茶</td><td>NT$200</td><td>¥2,480</td><td class="profit-positive">¥1,515</td><td><span class="badge badge-yellow">61%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ========== 商品・在庫管理 ========== -->
+<section id="inventory" class="section">
+
+  <div class="card">
+    <div class="toolbar">
+      <input class="search-box" type="text" placeholder="🔍 商品名・カテゴリで検索...">
+      <select class="form-select" style="width:auto;">
+        <option>全カテゴリ</option>
+        <option>食品・お茶</option>
+        <option>コスメ・美容</option>
+        <option>雑貨</option>
+        <option>衣料・ファッション</option>
+      </select>
+      <select class="form-select" style="width:auto;">
+        <option>全ステータス</option>
+        <option>在庫あり</option>
+        <option>販売中</option>
+        <option>売切れ</option>
+      </select>
+      <button class="btn btn-primary">＋ 商品追加</button>
+      <button class="btn btn-outline">📥 CSV取込</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>商品名</th>
+          <th>カテゴリ</th>
+          <th>仕入れ値</th>
+          <th>販売価格</th>
+          <th>利益</th>
+          <th>在庫数</th>
+          <th>ステータス</th>
+          <th>仕入れ先</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>台湾老舗ウーロン茶 500g</b></td>
+          <td><span class="badge badge-blue">食品・お茶</span></td>
+          <td>NT$280<br><small style="color:#718096">≈¥1,350</small></td>
+          <td>¥4,980</td>
+          <td class="profit-positive">+¥3,630</td>
+          <td><b style="color:#38a169">12</b></td>
+          <td><span class="badge badge-green">在庫あり</span></td>
+          <td>蝦皮購物</td>
+          <td><button class="btn btn-outline btn-sm">編集</button></td>
+        </tr>
+        <tr>
+          <td><b>パイナップルケーキ 詰合せ</b></td>
+          <td><span class="badge badge-blue">食品・お茶</span></td>
+          <td>NT$450<br><small style="color:#718096">≈¥2,170</small></td>
+          <td>¥5,500</td>
+          <td class="profit-positive">+¥3,330</td>
+          <td><b style="color:#dd6b20">2</b></td>
+          <td><span class="badge badge-yellow">残り少</span></td>
+          <td>誠品生活</td>
+          <td><button class="btn btn-outline btn-sm">編集</button></td>
+        </tr>
+        <tr>
+          <td><b>台湾コスメ アイクリーム</b></td>
+          <td><span class="badge badge-red" style="background:#fbd38d;color:#7b341e;">コスメ</span></td>
+          <td>NT$380<br><small style="color:#718096">≈¥1,830</small></td>
+          <td>¥3,980</td>
+          <td class="profit-positive">+¥2,150</td>
+          <td><b style="color:#38a169">8</b></td>
+          <td><span class="badge badge-green">在庫あり</span></td>
+          <td>PCHome</td>
+          <td><button class="btn btn-outline btn-sm">編集</button></td>
+        </tr>
+        <tr>
+          <td><b>台湾茶器セット（小）</b></td>
+          <td><span class="badge badge-gray">雑貨</span></td>
+          <td>NT$1,200<br><small style="color:#718096">≈¥5,780</small></td>
+          <td>¥8,800</td>
+          <td class="profit-positive">+¥3,020</td>
+          <td><b style="color:#e53e3e">0</b></td>
+          <td><span class="badge badge-red">売切れ</span></td>
+          <td>迪化街</td>
+          <td><button class="btn btn-outline btn-sm">編集</button></td>
+        </tr>
+        <tr>
+          <td><b>有機農法ジャスミン茶</b></td>
+          <td><span class="badge badge-blue">食品・お茶</span></td>
+          <td>NT$200<br><small style="color:#718096">≈¥965</small></td>
+          <td>¥2,480</td>
+          <td class="profit-positive">+¥1,515</td>
+          <td><b style="color:#38a169">25</b></td>
+          <td><span class="badge badge-green">在庫あり</span></td>
+          <td>蝦皮購物</td>
+          <td><button class="btn btn-outline btn-sm">編集</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ========== 利益計算 ========== -->
+<section id="calculator" class="section">
+
+  <div class="calc-grid">
+    <!-- 入力フォーム -->
+    <div class="card">
+      <div class="card-title">💱 仕入れ・コスト入力</div>
+
+      <div class="form-group">
+        <label class="form-label">仕入れ価格（TWD / NT$）</label>
+        <input class="form-input" type="number" id="buyPrice" value="500" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">TWD → JPY レート</label>
+        <input class="form-input" type="number" id="rate" value="4.82" step="0.01" oninput="calcProfit()">
+        <small style="color:#718096;font-size:0.78rem;">※ 現在レート目安: 1 TWD ≈ 4.82 JPY</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">国際送料（JPY）</label>
+        <input class="form-input" type="number" id="shipping" value="800" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">関税・輸入費用（JPY）</label>
+        <input class="form-input" type="number" id="tax" value="0" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">販売プラットフォーム手数料</label>
+        <select class="form-select" id="platform" onchange="calcProfit()">
+          <option value="10">メルカリ（10%）</option>
+          <option value="8.8">Amazon（8.8%）</option>
+          <option value="10">ヤフオク（10%）</option>
+          <option value="5.5">楽天（5.5%）</option>
+          <option value="0">自社サイト（0%）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">販売価格（JPY）</label>
+        <input class="form-input" type="number" id="sellPrice" value="5000" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">仕入れ数量（個）</label>
+        <input class="form-input" type="number" id="qty" value="1" min="1" oninput="calcProfit()">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="calcProfit()">✨ 利益を計算する</button>
+    </div>
+
+    <!-- 結果 -->
+    <div>
+      <div class="result-box">
+        <div style="font-size:0.85rem;opacity:0.7;margin-bottom:14px;">📊 計算結果</div>
+
+        <div class="result-row">
+          <span>仕入れ価格（JPY換算）</span>
+          <span id="res-buy">¥ 2,410</span>
+        </div>
+        <div class="result-row">
+          <span>国際送料</span>
+          <span id="res-ship">¥ 800</span>
+        </div>
+        <div class="result-row">
+          <span>関税・輸入費用</span>
+          <span id="res-tax">¥ 0</span>
+        </div>
+        <div class="result-row">
+          <span>プラットフォーム手数料</span>
+          <span id="res-fee">¥ 500</span>
+        </div>
+        <div class="result-row">
+          <span><b>総コスト</b></span>
+          <span id="res-cost" class="result-yellow">¥ 3,710</span>
+        </div>
+        <div class="result-row total">
+          <span>1個あたり利益</span>
+          <span id="res-profit" class="result-green">¥ 1,290</span>
+        </div>
+        <div class="result-row total">
+          <span>利益率</span>
+          <span id="res-rate" class="result-green">25.8%</span>
+        </div>
+
+        <div class="rate-badge" id="res-verdict">✅ 良好な利益率です</div>
+        <div style="margin-top:14px;font-size:0.82rem;opacity:0.6;">
+          数量 <span id="res-qty">1</span>個の合計利益:
+          <b id="res-total" style="color:#68d391;font-size:1.1rem;"> ¥ 1,290</b>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">📈 損益分岐シミュレーション</div>
+        <table style="font-size:0.85rem;">
+          <thead><tr><th>販売価格</th><th>利益</th><th>利益率</th><th>判定</th></tr></thead>
+          <tbody id="sim-table">
+            <tr><td>¥3,500</td><td class="profit-negative">-¥210</td><td>-</td><td><span class="badge badge-red">赤字</span></td></tr>
+            <tr><td>¥4,000</td><td class="profit-positive">+¥290</td><td>7.3%</td><td><span class="badge badge-yellow">低利益</span></td></tr>
+            <tr><td>¥5,000</td><td class="profit-positive">+¥1,290</td><td>25.8%</td><td><span class="badge badge-green">良好</span></td></tr>
+            <tr><td>¥6,000</td><td class="profit-positive">+¥2,690</td><td>44.8%</td><td><span class="badge badge-green">優良</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ========== 仕入れ先・販売先リンク ========== -->
+<section id="links" class="section">
+
+  <div class="card">
+    <div class="card-title">🇹🇼 台湾仕入れサイト</div>
+    <div class="link-grid">
+      <a class="link-card" href="https://shopee.tw" target="_blank">
+        <span class="link-icon">🛍️</span>
+        <div>
+          <div class="link-name">蝦皮購物（Shopee TW）</div>
+          <div class="link-desc">台湾最大のフリマ・EC。個人〜法人幅広い</div>
+          <div class="link-tag"><span class="badge badge-green">無料登録</span> <span class="badge badge-blue">個人可</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.pchome.com.tw" target="_blank">
+        <span class="link-icon">🖥️</span>
+        <div>
+          <div class="link-name">PChome Online</div>
+          <div class="link-desc">台湾の大手EC。電子機器・日用品が充実</div>
+          <div class="link-tag"><span class="badge badge-blue">法人向け</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.momo.com.tw" target="_blank">
+        <span class="link-icon">🛒</span>
+        <div>
+          <div class="link-name">momo購物網</div>
+          <div class="link-desc">台湾版Amazon的存在。生活用品が豊富</div>
+          <div class="link-tag"><span class="badge badge-green">セール多い</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://goods.ruten.com.tw" target="_blank">
+        <span class="link-icon">🏷️</span>
+        <div>
+          <div class="link-name">露天拍賣（Ruten）</div>
+          <div class="link-desc">台湾版ヤフオク。掘り出し物が多い</div>
+          <div class="link-tag"><span class="badge badge-yellow">オークション</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="#" target="_blank">
+        <span class="link-icon">🏪</span>
+        <div>
+          <div class="link-name">迪化街（ディーホア街）</div>
+          <div class="link-desc">台北の問屋街。乾物・漢方・お茶の宝庫</div>
+          <div class="link-tag"><span class="badge badge-red">現地仕入れ</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.books.com.tw" target="_blank">
+        <span class="link-icon">📚</span>
+        <div>
+          <div class="link-name">博客來（Books.com.tw）</div>
+          <div class="link-desc">書籍・文具・雑貨。日本未発売品あり</div>
+          <div class="link-tag"><span class="badge badge-blue">文具・書籍</span></div>
+        </div>
+      </a>
+    </div>
+
+    <div class="section-header">🇯🇵 日本販売プラットフォーム</div>
+    <div class="link-grid">
+      <a class="link-card" href="https://www.mercari.com" target="_blank">
+        <span class="link-icon">📱</span>
+        <div>
+          <div class="link-name">メルカリ</div>
+          <div class="link-desc">手数料10%。初心者に最も売れやすい</div>
+          <div class="link-tag"><span class="badge badge-green">手数料10%</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.amazon.co.jp" target="_blank">
+        <span class="link-icon">📦</span>
+        <div>
+          <div class="link-name">Amazon Japan</div>
+          <div class="link-desc">大量販売向き。FBA利用で効率UP</div>
+          <div class="link-tag"><span class="badge badge-yellow">手数料8.8〜</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://auctions.yahoo.co.jp" target="_blank">
+        <span class="link-icon">🔨</span>
+        <div>
+          <div class="link-name">ヤフオク！</div>
+          <div class="link-desc">希少品・コレクター向けに強い</div>
+          <div class="link-tag"><span class="badge badge-yellow">手数料10%</span></div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.rakuten.co.jp" target="_blank">
+        <span class="link-icon">🎁</span>
+        <div>
+          <div class="link-name">楽天市場</div>
+          <div class="link-desc">食品・コスメの固定ファン多い</div>
+          <div class="link-tag"><span class="badge badge-blue">法人向け</span></div>
+        </div>
+      </a>
+    </div>
+
+    <div class="section-header">🔧 便利ツール</div>
+    <div class="link-grid">
+      <a class="link-card" href="https://wise.com" target="_blank">
+        <span class="link-icon">💸</span>
+        <div>
+          <div class="link-name">Wise（送金）</div>
+          <div class="link-desc">TWD→JPY の低手数料送金サービス</div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.xe.com" target="_blank">
+        <span class="link-icon">💱</span>
+        <div>
+          <div class="link-name">XE Currency</div>
+          <div class="link-desc">リアルタイム為替レート確認</div>
+        </div>
+      </a>
+      <a class="link-card" href="https://www.post.japanpost.jp/int/charge/list/" target="_blank">
+        <span class="link-icon">✈️</span>
+        <div>
+          <div class="link-name">国際郵便料金表（日本郵便）</div>
+          <div class="link-desc">台湾→日本の送料計算に必須</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</section>
+
+<!-- ========== メモ・ノート ========== -->
+<section id="memo" class="section">
+
+  <div class="card">
+    <div class="memo-grid">
+      <!-- メモ一覧 -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <b style="font-size:0.95rem;">📝 メモ一覧</b>
+          <button class="btn btn-primary btn-sm">＋ 新規</button>
+        </div>
+        <input class="search-box" type="text" placeholder="🔍 メモ検索..." style="margin-bottom:12px;">
+
+        <div class="memo-item active" onclick="selectMemo(this, '蝦皮仕入れリサーチまとめ', '2026/03/28')">
+          <div class="memo-item-title">🔍 蝦皮仕入れリサーチまとめ</div>
+          <div class="memo-item-date">2026/03/28</div>
+          <div class="memo-item-preview">ウーロン茶系はNT$200〜300が狙い目。送料込みで利益率30%超えを...</div>
+        </div>
+        <div class="memo-item" onclick="selectMemo(this, '台北現地仕入れ計画', '2026/03/25')">
+          <div class="memo-item-title">✈️ 台北現地仕入れ計画</div>
+          <div class="memo-item-date">2026/03/25</div>
+          <div class="memo-item-preview">4月の訪台時に迪化街・士林夜市でまとめ買いする予定。予算TWD 2万</div>
+        </div>
+        <div class="memo-item" onclick="selectMemo(this, 'メルカリ出品テンプレート', '2026/03/20')">
+          <div class="memo-item-title">📋 メルカリ出品テンプレート</div>
+          <div class="memo-item-date">2026/03/20</div>
+          <div class="memo-item-preview">【台湾直輸入】〇〇 正規品 未開封 本場台湾から直接仕入れた...</div>
+        </div>
+        <div class="memo-item" onclick="selectMemo(this, '競合調査 - お茶カテゴリ', '2026/03/15')">
+          <div class="memo-item-title">📊 競合調査 - お茶カテゴリ</div>
+          <div class="memo-item-date">2026/03/15</div>
+          <div class="memo-item-preview">メルカリでの台湾茶の相場: 高山茶100g ¥2,000〜3,500...</div>
+        </div>
+      </div>
+
+      <!-- メモエディタ -->
+      <div class="memo-editor">
+        <input class="memo-title-input" type="text" id="memoTitle" value="🔍 蝦皮仕入れリサーチまとめ">
+        <textarea class="memo-textarea" id="memoContent">【リサーチ結果】2026年3月28日
+
+■ 狙い目カテゴリ
+- ウーロン茶・高山茶: NT$200〜300で仕入れ → メルカリ¥3,000〜4,500で販売可
+- パイナップルケーキ: 老舗ブランドは希少性が高く¥5,000超えも
+- 台湾コスメ: 日本未入荷ブランドが穴場
+
+■ 送料まとめ方法
+→ まとめて転送業者（マイシップ等）を使うと1kg ¥700〜800で済む
+
+■ 注意点
+- 食品は賞味期限を必ず確認（3ヶ月以上が望ましい）
+- コスメは成分表示の日本語シール貼付が必要な場合あり
+
+■ 次回リサーチ予定
+□ 有機農法系ブランドのまとめ買いテスト
+□ 台湾限定お菓子の需要調査</textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px;">
+          <div class="memo-tags">
+            <span class="tag-chip">仕入れ</span>
+            <span class="tag-chip blue">蝦皮</span>
+            <span class="tag-chip green">お茶</span>
+            <span class="tag-chip">リサーチ</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm">🏷️ タグ追加</button>
+            <button class="btn btn-primary btn-sm">💾 保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<script>
+// ナビゲーション切替
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// 利益計算
+function calcProfit() {
+  const buyTWD = parseFloat(document.getElementById('buyPrice').value) || 0;
+  const rate = parseFloat(document.getElementById('rate').value) || 4.82;
+  const ship = parseFloat(document.getElementById('shipping').value) || 0;
+  const tax = parseFloat(document.getElementById('tax').value) || 0;
+  const sell = parseFloat(document.getElementById('sellPrice').value) || 0;
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const feeRate = parseFloat(document.getElementById('platform').value) / 100;
+
+  const buyJPY = Math.round(buyTWD * rate);
+  const fee = Math.round(sell * feeRate);
+  const cost = buyJPY + ship + tax + fee;
+  const profit = sell - cost;
+  const profitRate = sell > 0 ? (profit / sell * 100).toFixed(1) : 0;
+
+  document.getElementById('res-buy').textContent = '¥ ' + buyJPY.toLocaleString();
+  document.getElementById('res-ship').textContent = '¥ ' + ship.toLocaleString();
+  document.getElementById('res-tax').textContent = '¥ ' + tax.toLocaleString();
+  document.getElementById('res-fee').textContent = '¥ ' + fee.toLocaleString();
+  document.getElementById('res-cost').textContent = '¥ ' + cost.toLocaleString();
+  document.getElementById('res-profit').textContent = (profit >= 0 ? '+' : '') + '¥ ' + profit.toLocaleString();
+  document.getElementById('res-profit').className = profit >= 0 ? 'result-green' : 'result-red';
+  document.getElementById('res-rate').textContent = profitRate + '%';
+  document.getElementById('res-rate').className = profitRate >= 20 ? 'result-green' : profitRate >= 0 ? 'result-yellow' : 'result-red';
+  document.getElementById('res-qty').textContent = qty;
+  document.getElementById('res-total').textContent = '¥ ' + (profit * qty).toLocaleString();
+
+  const verdict = document.getElementById('res-verdict');
+  if (profit < 0) {
+    verdict.textContent = '❌ 赤字です。価格を見直してください';
+    verdict.style.background = 'rgba(252,129,129,0.2)';
+  } else if (profitRate < 15) {
+    verdict.textContent = '⚠️ 利益率が低めです';
+    verdict.style.background = 'rgba(250,240,137,0.2)';
+  } else if (profitRate >= 30) {
+    verdict.textContent = '🎉 優良な利益率です！';
+    verdict.style.background = 'rgba(104,211,145,0.2)';
+  } else {
+    verdict.textContent = '✅ 良好な利益率です';
+    verdict.style.background = 'rgba(104,211,145,0.15)';
+  }
+}
+
+// メモ選択
+function selectMemo(el, title, date) {
+  document.querySelectorAll('.memo-item').forEach(m => m.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('memoTitle').value = el.querySelector('.memo-item-title').textContent;
+  document.getElementById('memoContent').value = el.querySelector('.memo-item-preview').textContent + '\n\n（メモを編集してください）';
+}
+
+// 初期計算
+calcProfit();
+</script>
+</body>
+</html>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>メルカリ出品テンプレート｜台湾コスメ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: #f5f5f5; color: #333; }
+
+  /* ======= モード切替ヘッダー ======= */
+  .mode-header {
+    background: #ff4060;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+  }
+  .mode-btn {
+    background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5);
+    color: white; border-radius: 20px; padding: 4px 16px; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; transition: background 0.15s;
+  }
+  .mode-btn:hover, .mode-btn.active { background: white; color: #ff4060; }
+
+  /* ======= メルカリ風ヘッダー ======= */
+  .mercari-header {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mercari-logo { color: #ff4060; font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; }
+  .mercari-search {
+    flex: 1; background: #f5f5f5; border: none; border-radius: 20px;
+    padding: 8px 16px; font-size: 0.9rem; outline: none;
+  }
+
+  /* ======= レイアウト ======= */
+  .container { max-width: 1080px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+  @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+
+  /* ======= 画像エリア ======= */
+  .images-area { }
+  .main-image {
+    width: 100%; aspect-ratio: 1/1; background: #f8f0f5;
+    border-radius: 8px; overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px; cursor: pointer;
+    border: 2px dashed #e0c0cc; transition: border-color 0.2s;
+  }
+  .main-image:hover { border-color: #ff4060; }
+  .main-image img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .main-image-placeholder {
+    text-align: center; color: #aaa; pointer-events: none;
+  }
+  .main-image-placeholder .icon { font-size: 3rem; margin-bottom: 8px; }
+  .main-image-placeholder .text { font-size: 0.85rem; }
+  .main-image-placeholder .subtext { font-size: 0.75rem; margin-top: 4px; color: #ccc; }
+  .img-count-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.55); color: white;
+    border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; font-weight: 700;
+  }
+  .img-delete-btn {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(255,64,96,0.85); color: white;
+    border: none; border-radius: 50%; width: 28px; height: 28px;
+    font-size: 0.9rem; cursor: pointer; display: none;
+    align-items: center; justify-content: center; font-weight: 700;
+    transition: background 0.15s;
+  }
+  .img-delete-btn:hover { background: #cc0030; }
+  .main-image:hover .img-delete-btn { display: flex; }
+
+  .thumb-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+  .thumb {
+    width: 72px; height: 72px; border-radius: 6px; background: #f0e8f0;
+    flex-shrink: 0; cursor: pointer; border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    transition: border-color 0.15s; overflow: hidden; position: relative;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb.active { border-color: #ff4060; }
+  .thumb:hover { border-color: #ffaabb; }
+  .add-thumb {
+    background: white; border: 2px dashed #ddd; color: #aaa; font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .add-thumb:hover { border-color: #ff4060; color: #ff4060; background: #fff0f3; }
+
+  /* ======= 商品情報エリア ======= */
+  .info-area { }
+  .product-title {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; line-height: 1.5;
+  }
+  .price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+  .price { font-size: 1.8rem; font-weight: 900; color: #ff4060; }
+  .price-yen { font-size: 1rem; font-weight: 700; color: #ff4060; }
+  .price-tax { font-size: 0.78rem; color: #888; }
+
+  .action-btn {
+    width: 100%; padding: 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 1rem; font-weight: 700; margin-bottom: 8px; transition: all 0.15s;
+  }
+  .btn-buy { background: #ff4060; color: white; }
+  .btn-buy:hover { background: #e0304f; }
+  .btn-offer { background: white; color: #ff4060; border: 2px solid #ff4060; }
+  .btn-offer:hover { background: #fff0f3; }
+
+  .info-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 14px 0; }
+  .info-table tr { border-bottom: 1px solid #f0f0f0; }
+  .info-table td { padding: 8px 4px; }
+  .info-table td:first-child { color: #888; width: 100px; }
+  .info-table td:last-child { font-weight: 500; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .tag { background: #f5f5f5; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; color: #555; cursor: pointer; }
+  .tag:hover { background: #ffe0e6; color: #ff4060; }
+
+  /* ======= 説明文エリア ======= */
+  .desc-section {
+    background: white; border-radius: 8px; padding: 16px; margin-top: 16px;
+  }
+  .desc-title { font-weight: 700; margin-bottom: 12px; font-size: 0.95rem; }
+  .desc-content {
+    font-size: 0.88rem; line-height: 1.9; color: #444; white-space: pre-wrap;
+  }
+
+  /* ======= 編集パネル ======= */
+  .edit-panel {
+    background: white; border-radius: 8px; padding: 0; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .edit-tabs { display: flex; border-bottom: 2px solid #f0f0f0; }
+  .edit-tab {
+    flex: 1; padding: 12px 8px; text-align: center; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .edit-tab.active { color: #ff4060; border-bottom-color: #ff4060; }
+  .edit-tab-content { padding: 16px; display: none; }
+  .edit-tab-content.active { display: block; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 5px; display: block; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 9px 11px; border: 1.5px solid #e0e0e0;
+    border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #ff4060; }
+  .form-textarea { resize: vertical; min-height: 200px; line-height: 1.7; }
+  .char-count { text-align: right; font-size: 0.75rem; color: #aaa; margin-top: 3px; }
+
+  .generate-btn {
+    width: 100%; padding: 10px; background: linear-gradient(135deg, #ff4060, #ff8c69);
+    color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 0.9rem;
+    cursor: pointer; margin-bottom: 12px; transition: opacity 0.15s;
+  }
+  .generate-btn:hover { opacity: 0.9; }
+
+  .copy-btn {
+    width: 100%; padding: 9px; background: white; color: #ff4060;
+    border: 1.5px solid #ff4060; border-radius: 6px; font-weight: 700; font-size: 0.88rem;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .copy-btn:hover { background: #fff0f3; }
+
+  /* ======= テンプレート一覧 ======= */
+  .template-card {
+    border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 12px;
+    margin-bottom: 10px; cursor: pointer; transition: all 0.15s;
+  }
+  .template-card:hover { border-color: #ff4060; background: #fff8f9; }
+  .template-card.active { border-color: #ff4060; background: #fff0f3; }
+  .template-name { font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
+  .template-preview { font-size: 0.75rem; color: #888; line-height: 1.5; }
+
+  /* ======= コピー成功トースト ======= */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #333; color: white; padding: 10px 24px; border-radius: 20px;
+    font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.3s;
+    z-index: 999; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .badge-new { background: #ff4060; color: white; }
+  .badge-tw { background: #c41e3a; color: white; }
+
+  /* ブランドプリセットボタン */
+  .preset-btn {
+    background: #fff0f3; border: 1.5px solid #fcc; color: #c53030;
+    border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .preset-btn:hover { background: #ff4060; color: white; border-color: #ff4060; }
+
+  /* ======= プレビューモード時のみ表示 ======= */
+  .preview-only { }
+  .edit-only { }
+  body.preview-mode .edit-only { display: none; }
+  body:not(.preview-mode) .preview-only { }
+</style>
+</head>
+<body>
+
+<!-- モード切替 -->
+<div class="mode-header">
+  <span>🛠️ 台湾コスメ メルカリ出品テンプレート</span>
+  <button class="mode-btn active" id="btn-edit" onclick="setMode('edit')">✏️ 編集モード</button>
+  <button class="mode-btn" id="btn-preview" onclick="setMode('preview')">👁 プレビュー</button>
+  <button class="mode-btn" onclick="copyDesc()">📋 説明文をコピー</button>
+</div>
+
+<!-- メルカリ風ヘッダー -->
+<div class="mercari-header">
+  <div class="mercari-logo">mercari</div>
+  <input class="mercari-search" type="text" placeholder="なんでも売り買いできる" readonly>
+</div>
+
+<!-- メインコンテナ -->
+<div class="container">
+
+  <!-- 左カラム: 商品表示 -->
+  <div>
+    <!-- 画像エリア -->
+    <div class="images-area">
+      <!-- 隠しファイル入力 -->
+      <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImages(event)">
+
+      <div class="main-image" id="mainImage" onclick="triggerUpload()">
+        <div class="main-image-placeholder" id="mainPlaceholder">
+          <div class="icon">📷</div>
+          <div class="text">クリックして画像をアップロード</div>
+          <div class="subtext">JPG・PNG・HEIC対応 / 最大10枚</div>
+        </div>
+        <button class="img-delete-btn" id="deleteBtn" onclick="deleteCurrentImage(event)" title="この画像を削除">✕</button>
+        <div class="img-count-badge" id="imgCountBadge" style="display:none"></div>
+      </div>
+      <div class="thumb-row" id="thumbRow">
+        <div class="thumb add-thumb" onclick="triggerUpload()" title="画像を追加">＋</div>
+      </div>
+      <p style="font-size:0.75rem;color:#aaa;margin-top:6px;">💡 画像をクリックして追加・サムネイルをクリックで切替</p>
+    </div>
+
+    <!-- 説明文表示 -->
+    <div class="desc-section">
+      <div class="desc-title">商品説明</div>
+      <div class="desc-content" id="descPreview">ここに生成された説明文が表示されます。右パネルで情報を入力して「説明文を生成」を押してください。</div>
+    </div>
+  </div>
+
+  <!-- 右カラム: 商品情報 + 編集パネル -->
+  <div class="info-area">
+
+    <!-- タイトル・価格 -->
+    <div style="background:white;border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div class="product-title" id="titlePreview">【台湾直輸入】商品名をここに入力してください</div>
+      <div class="price-row">
+        <span class="price-yen">¥</span>
+        <span class="price" id="pricePreview">---</span>
+        <span class="price-tax">（税込）</span>
+      </div>
+      <button class="action-btn btn-buy">購入手続きへ</button>
+      <button class="action-btn btn-offer">値下げ交渉する</button>
+
+      <table class="info-table">
+        <tr><td>カテゴリ</td><td id="catPreview">コスメ・香水・美容</td></tr>
+        <tr><td>商品の状態</td><td id="condPreview">新品、未使用</td></tr>
+        <tr><td>配送料の負担</td><td>送料込み（出品者負担）</td></tr>
+        <tr><td>発送元の地域</td><td>東京都</td></tr>
+        <tr><td>発送までの日数</td><td id="shipPreview">2〜3日で発送</td></tr>
+      </table>
+
+      <div class="tag-row" id="tagRow">
+        <span class="tag">#台湾コスメ</span>
+        <span class="tag">#台湾直輸入</span>
+        <span class="tag">#海外コスメ</span>
+      </div>
+    </div>
+
+    <!-- 編集パネル -->
+    <div class="edit-panel">
+      <div class="edit-tabs">
+        <div class="edit-tab active" onclick="switchTab('input')">📝 商品情報</div>
+        <div class="edit-tab" onclick="switchTab('template')">📋 テンプレ</div>
+        <div class="edit-tab" onclick="switchTab('tips')">💡 Tips</div>
+      </div>
+
+      <!-- 商品情報タブ -->
+      <div class="edit-tab-content active" id="tab-input">
+
+        <!-- ブランドプリセット -->
+        <div class="form-group">
+          <label class="form-label">🔥 人気ブランドから選ぶ（クリックで自動入力）</label>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            <button class="preset-btn" onclick="applyPreset('naruko')">NARUKO</button>
+            <button class="preset-btn" onclick="applyPreset('mybeauty')">我的美麗日記</button>
+            <button class="preset-btn" onclick="applyPreset('drwu')">Dr.Wu</button>
+            <button class="preset-btn" onclick="applyPreset('yuan')">YUAN 阿原</button>
+            <button class="preset-btn" onclick="applyPreset('chatzutang')">茶籽堂</button>
+            <button class="preset-btn" onclick="applyPreset('heme')">heme</button>
+            <button class="preset-btn" onclick="applyPreset('1028')">1028</button>
+            <button class="preset-btn" onclick="applyPreset('other')">その他</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">商品名</label>
+          <input class="form-input" id="inProductName" type="text" placeholder="例：ティーツリー シートマスク 10枚入り" oninput="liveUpdate()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ブランド名</label>
+          <input class="form-input" id="inBrand" type="text" placeholder="例：NARUKO（ナルコ）" oninput="liveUpdate()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">カテゴリ</label>
+          <select class="form-select" id="inCat" onchange="liveUpdate()">
+            <optgroup label="🧴 コスメ・美容">
+              <option value="スキンケア（フェイスマスク・パック）">スキンケア｜フェイスマスク・パック</option>
+              <option value="スキンケア（美容液・クリーム）">スキンケア｜美容液・クリーム</option>
+              <option value="スキンケア（化粧水・乳液）">スキンケア｜化粧水・乳液</option>
+              <option value="スキンケア（日焼け止め・UVケア）">スキンケア｜日焼け止め・UVケア</option>
+              <option value="メイクアップ（ファンデ・BBクリーム）">メイクアップ｜ファンデ・BBクリーム</option>
+              <option value="メイクアップ（口紅・リップ）">メイクアップ｜口紅・リップ</option>
+              <option value="メイクアップ（アイシャドウ・アイライナー）">メイクアップ｜アイシャドウ・アイライナー</option>
+              <option value="ヘアケア（シャンプー・トリートメント）">ヘアケア｜シャンプー・トリートメント</option>
+              <option value="ヘアケア（ヘアオイル・スタイリング）">ヘアケア｜ヘアオイル・スタイリング</option>
+              <option value="ボディケア（ローション・オイル）">ボディケア｜ローション・オイル</option>
+              <option value="ボディケア（入浴剤・バスソルト）">ボディケア｜入浴剤・バスソルト</option>
+              <option value="香水・フレグランス">香水・フレグランス</option>
+              <option value="コスメ（その他）">コスメ（その他）</option>
+            </optgroup>
+            <optgroup label="🍵 食品・飲料">
+              <option value="台湾茶（ウーロン茶・高山茶）">台湾茶｜ウーロン茶・高山茶</option>
+              <option value="台湾茶（緑茶・ジャスミン茶）">台湾茶｜緑茶・ジャスミン茶</option>
+              <option value="お菓子（パイナップルケーキ等）">お菓子｜パイナップルケーキ・スイーツ</option>
+              <option value="乾物・漢方食材">乾物・漢方食材</option>
+              <option value="インスタント食品・調味料">インスタント食品・調味料</option>
+              <option value="飲料（ドリンク・ジュース）">飲料｜ドリンク・ジュース</option>
+              <option value="食品（その他）">食品（その他）</option>
+            </optgroup>
+            <optgroup label="🏠 雑貨・インテリア">
+              <option value="茶器・食器">茶器・食器</option>
+              <option value="キッチン雑貨">キッチン雑貨</option>
+              <option value="インテリア・ディスプレイ">インテリア・ディスプレイ</option>
+              <option value="アロマ・ルームフレグランス">アロマ・ルームフレグランス</option>
+              <option value="文具・ステーショナリー">文具・ステーショナリー</option>
+              <option value="雑貨（その他）">雑貨（その他）</option>
+            </optgroup>
+            <optgroup label="👗 ファッション">
+              <option value="レディースファッション（トップス）">レディース｜トップス</option>
+              <option value="レディースファッション（ボトムス）">レディース｜ボトムス</option>
+              <option value="アクセサリー・ジュエリー">アクセサリー・ジュエリー</option>
+              <option value="バッグ・財布">バッグ・財布</option>
+              <option value="帽子・小物">帽子・小物</option>
+              <option value="ファッション（その他）">ファッション（その他）</option>
+            </optgroup>
+            <optgroup label="💊 健康・その他">
+              <option value="健康食品・サプリ">健康食品・サプリ</option>
+              <option value="ベビー・キッズ用品">ベビー・キッズ用品</option>
+              <option value="ペット用品">ペット用品</option>
+              <option value="本・雑誌（台湾版）">本・雑誌（台湾版）</option>
+              <option value="その他">その他</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">商品の特徴（複数選択可）</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="日本未発売"> 🔥日本未発売</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="台湾限定"> 🇹🇼台湾限定</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="保湿・うるおい"> 保湿・うるおい</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="美白・透明感"> 美白・透明感</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="エイジングケア"> エイジングケア</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="毛穴・引き締め"> 毛穴・引き締め</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="敏感肌対応"> 敏感肌対応</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="ドクターズコスメ"> ドクターズコスメ</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="天然成分配合"> 天然成分配合</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="オーガニック"> オーガニック</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="ノンパラベン"> ノンパラベン</label>
+            <label style="font-size:0.8rem;"><input type="checkbox" class="feature-cb" value="角質ケア"> 角質ケア</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">内容量・セット数</label>
+          <input class="form-input" id="inContent" type="text" placeholder="例：10枚入り × 3箱セット" oninput="liveUpdate()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">商品の状態</label>
+          <select class="form-select" id="inCond" onchange="liveUpdate()">
+            <option>新品、未使用</option>
+            <option>未使用に近い</option>
+            <option>目立った傷や汚れなし</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">販売価格（円）</label>
+          <input class="form-input" id="inPrice" type="number" placeholder="例：2980" oninput="liveUpdate()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">発送日数</label>
+          <select class="form-select" id="inShip" onchange="liveUpdate()">
+            <option>1〜2日で発送</option>
+            <option>2〜3日で発送</option>
+            <option>4〜7日で発送</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">追加アピールポイント（任意）</label>
+          <textarea class="form-textarea" id="inAppeal" style="min-height:80px;" placeholder="例：台湾現地で人気No.1のシートマスク。日本では入手困難なレア商品です。"></textarea>
+        </div>
+
+        <button class="generate-btn" onclick="generateDesc()">✨ 説明文を自動生成する</button>
+        <button class="copy-btn" onclick="copyDesc()">📋 説明文をコピー</button>
+      </div>
+
+      <!-- テンプレートタブ -->
+      <div class="edit-tab-content" id="tab-template">
+        <p style="font-size:0.82rem;color:#888;margin-bottom:12px;">クリックでテンプレートを選択してください</p>
+
+        <div class="template-card active" onclick="selectTemplate(this, 'standard')">
+          <div class="template-name">✅ スタンダード（おすすめ）</div>
+          <div class="template-preview">商品特徴 → 使用方法 → 注意事項 → 発送情報の標準的な構成</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'appeal')">
+          <div class="template-name">🌟 訴求強め</div>
+          <div class="template-preview">希少性・限定感を前面に出した、購買意欲を高める構成</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'simple')">
+          <div class="template-name">📄 シンプル</div>
+          <div class="template-preview">箇条書きで見やすくまとめたシンプル構成</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this, 'gift')">
+          <div class="template-name">🎁 ギフト向け</div>
+          <div class="template-preview">プレゼント需要を意識した、贈り物向けアピール構成</div>
+        </div>
+
+        <button class="generate-btn" style="margin-top:16px;" onclick="generateDesc()">✨ 選択テンプレで生成する</button>
+      </div>
+
+      <!-- Tipsタブ -->
+      <div class="edit-tab-content" id="tab-tips">
+        <div style="font-size:0.83rem;line-height:1.75;color:#444;">
+
+          <p style="font-weight:800;font-size:0.9rem;color:#ff4060;margin-bottom:10px;">📊 リサーチ結果 まとめ</p>
+
+          <!-- 人気ブランド -->
+          <p style="font-weight:700;margin-bottom:5px;">🔥 メルカリで売れる台湾ブランド TOP</p>
+          <table style="width:100%;font-size:0.78rem;border-collapse:collapse;margin-bottom:12px;">
+            <thead><tr style="background:#fff0f3;">
+              <th style="padding:5px 6px;text-align:left;border-bottom:1px solid #fcc;">ブランド</th>
+              <th style="padding:5px 6px;text-align:left;border-bottom:1px solid #fcc;">売れ筋商品</th>
+              <th style="padding:5px 6px;text-align:left;border-bottom:1px solid #fcc;">相場</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:5px 6px;font-weight:700;">NARUKO</td><td style="padding:5px 6px;">ティーツリーシートマスク</td><td style="padding:5px 6px;color:#e53e3e;">¥1,500〜3,000</td></tr>
+              <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:5px 6px;font-weight:700;">我的美麗日記</td><td style="padding:5px 6px;">黒真珠・プラセンタマスク</td><td style="padding:5px 6px;color:#e53e3e;">¥1,000〜2,500</td></tr>
+              <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:5px 6px;font-weight:700;">Dr.Wu</td><td style="padding:5px 6px;">マンデル酸ピーリング美容液</td><td style="padding:5px 6px;color:#e53e3e;">¥2,500〜5,000</td></tr>
+              <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:5px 6px;font-weight:700;">YUAN 阿原</td><td style="padding:5px 6px;">ヨモギ石鹸・ハーブソープ</td><td style="padding:5px 6px;color:#e53e3e;">¥1,200〜2,800</td></tr>
+              <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:5px 6px;font-weight:700;">茶籽堂</td><td style="padding:5px 6px;">シャンプー・ボディソープ</td><td style="padding:5px 6px;color:#e53e3e;">¥2,000〜4,000</td></tr>
+              <tr><td style="padding:5px 6px;font-weight:700;">heme / 1028</td><td style="padding:5px 6px;">リップ・アイライナー</td><td style="padding:5px 6px;color:#e53e3e;">¥800〜2,000</td></tr>
+            </tbody>
+          </table>
+
+          <!-- タイトルキーワード -->
+          <p style="font-weight:700;margin-bottom:5px;">🏷️ 売れるタイトルのコツ（40文字以内）</p>
+          <p style="background:#fff8f9;border-left:3px solid #ff4060;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:10px;">
+            <b>①必須ワード：</b>「台湾直輸入」「日本未発売」「台湾限定」<br>
+            <b>②ブランド名</b>を必ず入れる（検索されやすい）<br>
+            <b>③効果ワード：</b>「保湿」「美白」「角質ケア」「敏感肌」<br>
+            <b>④状態：</b>「新品」「未開封」「未使用」
+          </p>
+          <p style="font-size:0.75rem;color:#888;margin-bottom:12px;">例：【台湾直輸入🇹🇼】NARUKO ティーツリーシートマスク 新品 日本未発売</p>
+
+          <!-- 価格帯 -->
+          <p style="font-weight:700;margin-bottom:5px;">💰 利益率データ（コスメ平均）</p>
+          <p style="margin-bottom:10px;">コスメ平均利益率：<b style="color:#e53e3e;">12〜20%</b>（安定ジャンル）<br>
+          ファッション・バッグ：<b style="color:#e53e3e;">平均50%</b>（高利益）<br>
+          相場より5〜10%安くスタート → 閲覧が伸びなければ100円単位で値下げ</p>
+
+          <!-- ハッシュタグ -->
+          <p style="font-weight:700;margin-bottom:5px;">🔖 使えるハッシュタグ</p>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#台湾コスメ</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#台湾直輸入</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#日本未発売</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#海外コスメ</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#NARUKO</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#我的美麗日記</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#DrWu</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#台湾スキンケア</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#シートマスク</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#台湾土産</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#プチプラコスメ</span>
+            <span style="background:#fff0f3;border:1px solid #fcc;border-radius:12px;padding:2px 8px;font-size:0.72rem;color:#c53030;">#アジアンコスメ</span>
+          </div>
+
+          <!-- 写真 -->
+          <p style="font-weight:700;margin-bottom:5px;">📸 写真の撮り方（売れる順）</p>
+          <p style="margin-bottom:10px;">① 白背景・正面（サムネに使う）<br>
+          ② パッケージ裏面・成分表示<br>
+          ③ 内容物を全部並べて撮る<br>
+          ④ 使用イメージ（肌に乗せる等）<br>
+          ⑤ 台湾ブランドロゴのアップ</p>
+
+          <!-- 注意 -->
+          <p style="font-weight:700;margin-bottom:5px;">⚠️ 必ず記載すること</p>
+          <p>・並行輸入品・台湾版である旨<br>
+          ・日本語表記なし（台湾語・中国語）<br>
+          ・賞味期限／製造年月日<br>
+          ・液体物の場合は容量（ml）<br>
+          ・「肌に合わない場合は使用中止」文言</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- トースト通知 -->
+<div class="toast" id="toast">✅ クリップボードにコピーしました</div>
+
+<script>
+let currentTemplate = 'standard';
+let images = [];       // {dataUrl, name} の配列
+let currentIdx = 0;    // 現在表示中の画像インデックス
+
+// ===== 画像アップロード =====
+function triggerUpload() {
+  document.getElementById('imageInput').click();
+}
+
+function handleImages(e) {
+  const files = [...e.target.files];
+  if (images.length + files.length > 10) {
+    alert('画像は最大10枚までです。');
+    return;
+  }
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images.push({ dataUrl: ev.target.result, name: file.name });
+      loaded++;
+      if (loaded === files.length) {
+        currentIdx = images.length - 1;
+        renderImages();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = ''; // 同じファイルを再選択できるようにリセット
+}
+
+function renderImages() {
+  const mainImage = document.getElementById('mainImage');
+  const placeholder = document.getElementById('mainPlaceholder');
+  const badge = document.getElementById('imgCountBadge');
+  const thumbRow = document.getElementById('thumbRow');
+
+  // メイン画像更新
+  let mainImg = mainImage.querySelector('img');
+  if (images.length === 0) {
+    if (mainImg) mainImg.remove();
+    placeholder.style.display = '';
+    badge.style.display = 'none';
+    thumbRow.innerHTML = '<div class="thumb add-thumb" onclick="triggerUpload()" title="画像を追加">＋</div>';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  badge.style.display = '';
+  badge.textContent = `${currentIdx + 1} / ${images.length}`;
+
+  if (!mainImg) {
+    mainImg = document.createElement('img');
+    mainImage.insertBefore(mainImg, mainImage.firstChild);
+  }
+  mainImg.src = images[currentIdx].dataUrl;
+
+  // サムネイル更新
+  thumbRow.innerHTML = '';
+  images.forEach((img, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb' + (i === currentIdx ? ' active' : '');
+    thumb.title = img.name;
+    const tImg = document.createElement('img');
+    tImg.src = img.dataUrl;
+    thumb.appendChild(tImg);
+    thumb.onclick = () => { currentIdx = i; renderImages(); };
+    thumbRow.appendChild(thumb);
+  });
+
+  // 追加ボタン（10枚未満なら表示）
+  if (images.length < 10) {
+    const addBtn = document.createElement('div');
+    addBtn.className = 'thumb add-thumb';
+    addBtn.textContent = '＋';
+    addBtn.title = '画像を追加';
+    addBtn.onclick = triggerUpload;
+    thumbRow.appendChild(addBtn);
+  }
+}
+
+function deleteCurrentImage(e) {
+  e.stopPropagation();
+  if (images.length === 0) return;
+  images.splice(currentIdx, 1);
+  if (currentIdx >= images.length) currentIdx = Math.max(0, images.length - 1);
+  renderImages();
+}
+
+// タブ切替
+function switchTab(id) {
+  document.querySelectorAll('.edit-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// テンプレート選択
+function selectTemplate(el, name) {
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentTemplate = name;
+}
+
+// ライブ更新（タイトル・価格・テーブル）
+function liveUpdate() {
+  const name = document.getElementById('inProductName').value;
+  const brand = document.getElementById('inBrand').value;
+  const price = document.getElementById('inPrice').value;
+  const cat = document.getElementById('inCat').value;
+  const cond = document.getElementById('inCond').value;
+  const ship = document.getElementById('inShip').value;
+
+  const title = name ? `【台湾直輸入🇹🇼】${name}${brand ? ' / ' + brand : ''}` : '【台湾直輸入】商品名をここに入力してください';
+  document.getElementById('titlePreview').textContent = title;
+  document.getElementById('pricePreview').textContent = price ? Number(price).toLocaleString() : '---';
+  document.getElementById('catPreview').textContent = 'コスメ・香水・美容 > ' + cat;
+  document.getElementById('condPreview').textContent = cond;
+  document.getElementById('shipPreview').textContent = ship;
+
+  // タグ更新
+  const features = [...document.querySelectorAll('.feature-cb:checked')].map(c => c.value);
+  const baseTags = ['#台湾コスメ', '#台湾直輸入', '#海外コスメ'];
+  const allTags = [...baseTags, ...features.map(f => '#' + f)];
+  document.getElementById('tagRow').innerHTML = allTags.map(t => `<span class="tag">${t}</span>`).join('');
+}
+
+// 説明文生成
+function generateDesc() {
+  const name = document.getElementById('inProductName').value || '（商品名未入力）';
+  const brand = document.getElementById('inBrand').value;
+  const cat = document.getElementById('inCat').value;
+  const content = document.getElementById('inContent').value;
+  const cond = document.getElementById('inCond').value;
+  const ship = document.getElementById('inShip').value;
+  const appeal = document.getElementById('inAppeal').value;
+  const features = [...document.querySelectorAll('.feature-cb:checked')].map(c => c.value);
+
+  const featStr = features.length > 0 ? features.join('、') : '高品質・人気商品';
+  const brandStr = brand ? `ブランド：${brand}\n` : '';
+  const contentStr = content ? `内容量：${content}\n` : '';
+  const appealStr = appeal ? `\n${appeal}\n` : '';
+
+  let desc = '';
+
+  if (currentTemplate === 'standard') {
+    desc = `【台湾直輸入🇹🇼】${name}
+
+━━━━━━━━━━━━━━━━━━━
+✨ 商品のご紹介
+━━━━━━━━━━━━━━━━━━━
+台湾現地から直接仕入れた${cat}です。
+日本でも人気急上昇中の${featStr}に優れた商品です。
+${appealStr}
+━━━━━━━━━━━━━━━━━━━
+📦 商品詳細
+━━━━━━━━━━━━━━━━━━━
+${brandStr}${contentStr}カテゴリ：${cat}
+商品状態：${cond}
+・未開封・未使用品です
+・台湾正規品（並行輸入品）
+・日本語表記なし（台湾語・中国語表記）
+・賞味期限：購入時に確認済み（1年以上）
+
+━━━━━━━━━━━━━━━━━━━
+🚚 発送について
+━━━━━━━━━━━━━━━━━━━
+・送料込み（出品者負担）
+・${ship}
+・丁寧に梱包してお送りします
+・ギフト包装ご希望の方はコメントください
+
+━━━━━━━━━━━━━━━━━━━
+⚠️ ご購入前にご確認ください
+━━━━━━━━━━━━━━━━━━━
+・台湾版商品のため、表記は台湾語・中国語です
+・並行輸入品のため、国内正規品と仕様が異なる場合があります
+・肌に合わない場合はご使用をお止めください
+・コメントなし即購入歓迎です！`;
+  } else if (currentTemplate === 'appeal') {
+    desc = `🌟【台湾直輸入・激レア】${name} 🌟
+
+台湾で大ブームの${name}がついに日本上陸！
+現地でしか買えない${featStr}コスメです。
+
+${brandStr}${contentStr}${appealStr}
+⭐ なぜこの商品が選ばれるのか？
+→ 台湾国内で販売数No.1クラスの人気アイテム
+→ SNSで口コミ拡散中！日本未発売の希少品
+→ ${featStr}効果で肌トラブルにアプローチ
+
+💌 ご購入者様の声
+「使い始めて1週間で変化を実感！」
+「台湾のお土産で大好評でした」
+
+📦 状態：${cond} / 発送：${ship}
+ご不明な点はお気軽にコメントください😊`;
+  } else if (currentTemplate === 'simple') {
+    desc = `【台湾直輸入🇹🇼】${name}
+
+■ 商品情報
+${brandStr}・種類：${cat}
+${contentStr}・状態：${cond}
+・${featStr}
+
+■ 特徴
+${appealStr || '・台湾現地で人気の商品です\n・${featStr}に効果的\n'}
+■ 注意事項
+・並行輸入品（台湾語表記）
+・肌に合わない場合はご使用中止を
+
+■ 発送
+・送料込み
+・${ship}
+・丁寧梱包`;
+  } else if (currentTemplate === 'gift') {
+    desc = `🎁 贈り物にも最適！【台湾直輸入】${name}
+
+台湾現地から直接仕入れた特別なコスメをお届けします。
+大切な方へのプレゼントにもぴったりな${featStr}の逸品です。
+
+${brandStr}${contentStr}${appealStr}
+🎀 プレゼント対応について
+ご希望の方はギフト包装にてお送りします。
+「ギフト包装希望」とコメントください（無料対応）。
+
+📦 商品状態：${cond}
+🚚 発送：${ship}・送料込み
+🇹🇼 台湾直輸入品（並行輸入）
+
+コメントお気軽にどうぞ！`;
+  }
+
+  document.getElementById('descPreview').textContent = desc;
+
+  // 文字数表示
+  const charInfo = document.createElement('div');
+  charInfo.style.cssText = 'font-size:0.75rem;color:#aaa;margin-top:8px;';
+  charInfo.textContent = `文字数：${desc.length}文字（上限1000文字）`;
+  const existing = document.querySelector('.char-info');
+  if (existing) existing.remove();
+  charInfo.className = 'char-info';
+  document.querySelector('.desc-section').appendChild(charInfo);
+}
+
+// 説明文コピー
+function copyDesc() {
+  const text = document.getElementById('descPreview').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  });
+}
+
+// モード切替（プレビュー/編集）
+function setMode(mode) {
+  document.getElementById('btn-edit').classList.toggle('active', mode === 'edit');
+  document.getElementById('btn-preview').classList.toggle('active', mode === 'preview');
+  const panel = document.querySelector('.edit-panel');
+  if (mode === 'preview') {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = '';
+  }
+}
+
+// ===== ブランドプリセット =====
+const presets = {
+  naruko: {
+    name: 'NARUKO（ナルコ）',
+    product: 'ティーツリー ポア ミニマイジング シートマスク',
+    cat: 'スキンケア（フェイスマスク・パック）',
+    features: ['日本未発売', '保湿・うるおい', '毛穴・引き締め', '敏感肌対応', '天然成分配合'],
+    appeal: '台湾でNo.1の人気を誇るNARUKOのシートマスク。ティーツリーの天然成分が毛穴の汚れを取り除き、引き締め効果を発揮します。日本ではなかなか手に入らない台湾限定商品です。'
+  },
+  mybeauty: {
+    name: '我的美麗日記（My Beauty Diary）',
+    product: '黒真珠 モイスチャーマスク',
+    cat: 'スキンケア（フェイスマスク・パック）',
+    features: ['台湾限定', '保湿・うるおい', '美白・透明感'],
+    appeal: '台湾で大人気の我的美麗日記シリーズ。黒真珠エキス配合で、しっとりとしたうるおいと透明感を与えます。1枚約100円前後と高コスパで、お土産としても大人気！'
+  },
+  drwu: {
+    name: 'Dr.Wu',
+    product: 'マンデル酸 ピーリング 美容液 18%',
+    cat: 'スキンケア（美容液・クリーム）',
+    features: ['日本未発売', '角質ケア', 'ドクターズコスメ', '美白・透明感'],
+    appeal: '台湾の皮膚科医が開発したドクターズコスメ。マンデル酸18%配合で角質ケア・毛穴改善に効果的。日本未発売のため入手困難な人気商品です。'
+  },
+  yuan: {
+    name: 'YUAN 阿原（ユアン）',
+    product: 'ヨモギ ハーブソープ',
+    cat: 'ボディケア（ローション・オイル）',
+    features: ['台湾限定', '天然成分配合', 'オーガニック', '敏感肌対応'],
+    appeal: '台湾を代表するオーガニックコスメブランド・阿原のヨモギ石鹸。台湾では30秒に1個売れる超人気商品。100%天然素材で敏感肌にも安心して使えます。'
+  },
+  chatzutang: {
+    name: '茶籽堂（チャーズータン）',
+    product: 'チャノミ シャンプー',
+    cat: 'ヘアケア（シャンプー・トリートメント）',
+    features: ['台湾限定', '天然成分配合', 'オーガニック', 'ノンパラベン'],
+    appeal: '茶の実から作られた台湾ナチュラルコスメ「茶籽堂」。頭皮の皮脂バランスを整え、ハリのある髪へ。環境にやさしいパッケージも人気の秘密。日本での正規販売なし。'
+  },
+  heme: {
+    name: 'heme（ヒーム）',
+    product: 'ウォーターフル リップグロス',
+    cat: 'メイクアップ（口紅・リップ）',
+    features: ['日本未発売', '台湾限定'],
+    appeal: '台湾女子の間で爆発的人気のカラーコスメブランド heme。発色良くプチプラで、日本では手に入りません。SNSでも話題沸騰中のレア商品です。'
+  },
+  '1028': {
+    name: '1028 Visual Therapy',
+    product: 'スーパーラスティング アイライナー',
+    cat: 'メイクアップ（アイシャドウ・アイライナー）',
+    features: ['日本未発売', '台湾限定'],
+    appeal: '台湾コスメの定番ブランド 1028。にじみにくく長時間キープするアイライナーが大人気。日本未発売のため台湾土産としても喜ばれる一品です。'
+  },
+  other: { name: '', product: '', cat: 'スキンケア（フェイスマスク・パック）', features: [], appeal: '' }
+};
+
+function applyPreset(key) {
+  const p = presets[key];
+  document.getElementById('inProductName').value = p.product;
+  document.getElementById('inBrand').value = p.name;
+  document.getElementById('inAppeal').value = p.appeal;
+
+  // カテゴリ選択
+  const catSel = document.getElementById('inCat');
+  for (let opt of catSel.options) {
+    if (opt.value === p.cat) { catSel.value = opt.value; break; }
+  }
+
+  // チェックボックスリセット→選択
+  document.querySelectorAll('.feature-cb').forEach(cb => {
+    cb.checked = p.features.includes(cb.value);
+  });
+
+  liveUpdate();
+}
+
+// チェックボックスのイベント
+document.querySelectorAll('.feature-cb').forEach(cb => cb.addEventListener('change', liveUpdate));
+
+// ドラッグ＆ドロップ対応
+const mainImage = document.getElementById('mainImage');
+mainImage.addEventListener('dragover', e => { e.preventDefault(); mainImage.style.borderColor = '#ff4060'; });
+mainImage.addEventListener('dragleave', () => { mainImage.style.borderColor = ''; });
+mainImage.addEventListener('drop', e => {
+  e.preventDefault();
+  mainImage.style.borderColor = '';
+  const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
+  if (images.length + files.length > 10) { alert('画像は最大10枚までです。'); return; }
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images.push({ dataUrl: ev.target.result, name: file.name });
+      loaded++;
+      if (loaded === files.length) { currentIdx = images.length - 1; renderImages(); }
+    };
+    reader.readAsDataURL(file);
+  });
+});
+</script>
+</body>
+</html>
